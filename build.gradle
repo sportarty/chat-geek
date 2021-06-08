@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
 }
 
 group 'org.example'
@@ -9,6 +10,17 @@ repositories {
     mavenCentral()
 }
 
+javafx {
+    version = "11"
+    modules = [ 'javafx.controls' , 'javafx.fxml']
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    // https://mvnrepository.com/artifact/org.postgresql/postgresql
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.20'
+
+
 }
+
+

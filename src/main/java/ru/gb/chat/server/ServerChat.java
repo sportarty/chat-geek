@@ -40,6 +40,11 @@ public class ServerChat {
         broadcastClientList();
     }
 
+    public void update(ClientHandler client) {
+        clients.add(client);
+        broadcastClientList();
+    }
+
     public void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
         broadcastClientList();

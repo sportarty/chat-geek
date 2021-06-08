@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 
 /**
  * Created by Artem Kropotov on 17.05.2021
@@ -14,7 +15,7 @@ public class ClientHandler {
     private DataOutputStream out;
     private DataInputStream in;
     private ServerChat serverChat;
-    private AuthService<User> authService = ListAuthService.getInstance();
+    private AuthService<User> authService = DBAuthService.getInstance();
     private User user;
 
     public ClientHandler(Socket socket, ServerChat serverChat) {
@@ -66,6 +67,14 @@ public class ClientHandler {
                             if (msg.startsWith("/w")) {
                                 String[] token = msg.split("\\s", 3);
                                 serverChat.privateMsg(this, token[1], token[2]);
+
+                            }
+                            if (msg.startsWith("/update")) {
+                                String[] token = msg.split("\\s", 2);
+                                System.out.println(token[1]);
+                                serverChat.unsubscribe(this);
+                                this.user= authService.updateNickByUser(this.getUser(),token[1]);
+                                serverChat.subscribe(this);
 
                             }
                             if (msg.equals("/del")) {
