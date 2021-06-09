@@ -10,11 +10,14 @@ public class ClientChat extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("/sample.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/sample.fxml"));
+        Parent root = loader.load();
+        Controller controller = loader.getController();
         primaryStage.setTitle("Chat");
         primaryStage.setScene(new Scene(root, 400, 275));
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
+            controller.shutdown();
             NetworkService.close();
         });
     }
