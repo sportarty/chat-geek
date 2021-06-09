@@ -1,5 +1,6 @@
 package ru.gb.chat.server;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -9,6 +10,8 @@ public interface CrudService<T, ID> {
     T save(T object);
 
     T remove(T object);
+
+    T changeNick(T object) throws SQLException;
 
     T removeById(ID id);
 

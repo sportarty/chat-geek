@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.SQLException;
 
 /**
  * Created by Artem Kropotov on 17.05.2021
@@ -14,8 +15,9 @@ public class ClientHandler {
     private DataOutputStream out;
     private DataInputStream in;
     private ServerChat serverChat;
-    private AuthService<User> authService = ListAuthService.getInstance();
+    //private AuthService<User> authService = ListAuthService.getInstance();
     private User user;
+    private AuthService<User> authService = null;
 
     public ClientHandler(Socket socket, ServerChat serverChat) {
         try {
@@ -23,6 +25,7 @@ public class ClientHandler {
             this.out = new DataOutputStream(socket.getOutputStream());
             this.in = new DataInputStream(socket.getInputStream());
             this.serverChat = serverChat;
+            this.authService = DBAuthService.getInstance(serverChat.getConnection());
 
             new Thread(() -> {
                 try {

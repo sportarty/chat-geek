@@ -3,19 +3,47 @@ package ru.gb.chat.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Artem Kropotov on 17.05.2021
  */
 public class ServerChat {
+    // База данных по клиентам должна крутиться на сервере, следовательно и запускать БД стоит с сервером
+    // А ClientHandler'ы должны только получать доступ к уже имеющимся записям в БД или
+    // создавать новую запись при регистрации
+    private  String DB_URL = "jdbc:postgresql://127.0.0.1:5432/gb";
+    private  String USER = "postgres";
+    private  String PASS = "admin";
+
+    private Connection connection; // Интерфейс подключения
+    private Statement statement; // Для запросов в БД
+
+    public Connection getConnection() {
+        return connection;
+    }
+
     private final CopyOnWriteArrayList<ClientHandler> clients = new CopyOnWriteArrayList<>();
 
     public static void main(String[] args) {
-        new ServerChat().start();
+        try {
+            new ServerChat().start();
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void start() {
+    public void start() throws SQLException, ClassNotFoundException {
+        startDB();
+        ResultSet  resultSet = statement.executeQuery("SELECT * FROM employee");
+        while (resultSet.next()) {                                          // перебор элементов
+            System.out.println(resultSet.getInt(1) + " " +                  // вывод элементов на консоли сервера
+                    resultSet.getString(2) + " " +
+                    resultSet.getString(3) + " " +
+                    resultSet.getString(4) + " ");
+        }
+
         try(ServerSocket serverSocket = new ServerSocket(8189)) {
             System.out.println("Сервер запущен");
             while (true) {
@@ -84,6 +112,24 @@ public class ServerChat {
         String nickList = stringBuilder.toString();
         for (ClientHandler c : clients) {
             c.sendMessage(nickList);
+        }
+    }
+
+    public void startDB() throws ClassNotFoundException, SQLException {
+        Class.forName("org.postgresql.Driver"); // Загрузка статического контекста драйвера
+        System.out.println("Connection to DB Clients");
+        connection = DriverManager.getConnection(DB_URL, USER, PASS); // Создание соединения
+        statement = connection.createStatement();// Получение statment из нашего connection
+        System.out.println("Connection to DB Clients completed");
+    }
+
+    public void disconnect() {
+        try { // При закрытии БД нет смысла проброса исключения поэтому обработка здесь
+            if(connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }
