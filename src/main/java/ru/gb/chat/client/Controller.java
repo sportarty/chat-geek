@@ -74,6 +74,7 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        textArea.setText(HistoryService.load());
         setAuthenticated(false);
         clientsList.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
@@ -148,5 +149,9 @@ public class Controller implements Initializable {
         });
 
         NetworkService.setCallOnDisconnect(args -> setAuthenticated(false));
+    }
+
+    public void shutdown() {
+        HistoryService.save(textArea.getText());
     }
 }
