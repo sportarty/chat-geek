@@ -29,41 +29,61 @@ public class DBAuthService  implements AuthService<User>  {
     }
 
     @Override
-    public User findByLoginAndPassword(String login, String password) throws SQLException {
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM employee");
-        while (resultSet.next()) {
-            if(resultSet.getString(2).equals(login) & resultSet.getString(4).equals(password)) {
-                return new User(resultSet.getString(2),resultSet.getString(4),resultSet.getString(3));
+    public User findByLoginAndPassword(String login, String password) {
+        try {
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM employee");
+            while (resultSet.next()) {
+                if (resultSet.getString(2).equals(login) & resultSet.getString(4).equals(password)) {
+                    return new User(resultSet.getString(2), resultSet.getString(4), resultSet.getString(3));
+                }
             }
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     @Override
-    public User findByLoginOrNick(String login, String nick) throws SQLException {
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM employee");
-        while (resultSet.next()) {                                          // перебор элементов
-            if(resultSet.getString(2).equals(login) & resultSet.getString(3).equals(nick)) {
-                return new User(resultSet.getString(2),resultSet.getString(4),resultSet.getString(3));
+    public User findByLoginOrNick(String login, String nick) {
+        try {
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM employee");
+            while (resultSet.next()) {                                          // перебор элементов
+                if (resultSet.getString(2).equals(login) & resultSet.getString(3).equals(nick)) {
+                    return new User(resultSet.getString(2), resultSet.getString(4), resultSet.getString(3));
+                }
             }
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     @Override
-    public User save(User user) throws SQLException {
+    public User save(User user)  {
+        try {
         statement.executeUpdate(String.format("INSERT INTO employee (last_name, first_name, age) VALUES('%s','%s','%s');",user.getNickname(),user.getLogin(),user.getPassword()));
         return user;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
-    public User remove(User user) throws SQLException {
-        statement.executeUpdate(String.format("DELETE INTO employee (last_name, first_name, age) VALUES('%s','%s','%s');",user.getNickname(),user.getLogin(),user.getPassword()));
-        return user;
+    public User remove(User user)  {
+        try {
+            statement.executeUpdate(String.format("DELETE INTO employee (last_name, first_name, age) VALUES('%s','%s','%s');", user.getNickname(), user.getLogin(), user.getPassword()));
+            return user;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
-    public User changeNick(User user) throws SQLException {
+    public User changeNick(User user) {
         return user;
     }
 

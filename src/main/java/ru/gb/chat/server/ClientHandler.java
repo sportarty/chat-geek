@@ -87,7 +87,7 @@ public class ClientHandler {
                     disconnect();
                 }
             }).start();
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             disconnect();
             e.printStackTrace();
         }
