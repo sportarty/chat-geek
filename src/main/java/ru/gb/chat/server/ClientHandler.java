@@ -68,6 +68,9 @@ public class ClientHandler {
                                 serverChat.privateMsg(this, token[1], token[2]);
 
                             }
+                            if (msg.startsWith("/update")) {
+                                //todo доделать updateNickname
+                            }
                             if (msg.equals("/del")) {
                                 authService.remove(user);
                                 sendMessage("/end");

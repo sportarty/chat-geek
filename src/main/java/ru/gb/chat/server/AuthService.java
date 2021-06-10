@@ -6,4 +6,5 @@ package ru.gb.chat.server;
 public interface AuthService<T> extends CrudService<T, Long> {
     User findByLoginAndPassword(String login, String password);
     User findByLoginOrNick(String login, String nick);
+    User updateNick(User user, String nick);
 }

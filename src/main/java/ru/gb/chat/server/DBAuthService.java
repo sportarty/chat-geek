@@ -90,6 +90,22 @@ public class DBAuthService  implements AuthService<User>  {
     }
 
     @Override
+    public User updateNick(User user, String nick) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE users SET nickname=? WHERE login=? AND password=? AND nickname=?");
+            ps.setString(1, nick);
+            ps.setString(2, user.getLogin());
+            ps.setString(3, user.getPassword());
+            ps.setString(4, user.getNickname());
+            ps.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return null;
+        }
+        return findByLoginAndPassword(user.getLogin(), user.getPassword());
+    }
+
+    @Override
     public User save(User object) {
         try {
             PreparedStatement ps = connection.prepareStatement("INSERT INTO users (login, password, nick)  VALUES (?,?,?)");
