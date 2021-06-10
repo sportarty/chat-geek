@@ -14,7 +14,8 @@ public class ClientHandler {
     private DataOutputStream out;
     private DataInputStream in;
     private ServerChat serverChat;
-    private AuthService<User> authService = ListAuthService.getInstance();
+    private AuthService<User> authService = DBAuthService.getInstance();
+//    private ru.gb.chat.server.AuthService<User> authService = ListAuthService.getInstance();
     private User user;
 
     public ClientHandler(Socket socket, ServerChat serverChat) {
