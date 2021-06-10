@@ -7,7 +7,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.io.File;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -74,6 +76,20 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        try {
+            DBHistoryService.startDB();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        File file = new File(FileHistoryService.HS_FILE);
+        if(!file.exists()) {
+        textArea.setText(DBHistoryService.loadHistory());           // загрузка истории из ДБ
+        } else {
+           textArea.setText(FileHistoryService.loadHistory());       // загрузка истории из файла
+        }
+
         setAuthenticated(false);
         clientsList.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
@@ -147,6 +163,10 @@ public class Controller implements Initializable {
             }
         });
 
-        NetworkService.setCallOnDisconnect(args -> setAuthenticated(false));
+        NetworkService.setCallOnDisconnect(args -> {
+            FileHistoryService.saveHistory(textArea.getText());
+            DBHistoryService.saveHistory(textArea.getText());
+            setAuthenticated(false);
+        });
     }
 }

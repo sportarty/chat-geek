@@ -1,5 +1,6 @@
 package ru.gb.chat.server;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -59,6 +60,11 @@ public class ListAuthService implements AuthService<User> {
     public User remove(User user) {
         users.remove(user);
         return user;
+    }
+
+    @Override
+    public User changeNick(User object) throws SQLException {
+        return null;
     }
 
     @Override
