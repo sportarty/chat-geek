@@ -3,6 +3,7 @@ package ru.gb.chat.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -17,21 +18,24 @@ public class ServerChat {
 
     public void start() {
         try(ServerSocket serverSocket = new ServerSocket(8189)) {
+            DBServise.connect();
             System.out.println("Сервер запущен");
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("Клиент подключился");
                 new ClientHandler(socket, this);
             }
-        } catch (IOException e) {
+        } catch (IOException | SQLException | ClassNotFoundException e) {
             e.printStackTrace();
+        } finally {
+            DBServise.disconnect();
         }
         System.out.println();
     }
 
     public void broadcastMsg(String msg) {
         for (ClientHandler client : clients) {
-            client.sendMessage(msg);
+            client.sendMessageWithHistory(msg);
         }
     }
 
@@ -58,17 +62,17 @@ public class ServerChat {
 
     public void privateMsg(ClientHandler sender, String nick, String message) {
         if (sender.getUser().getNickname().equals(nick)) {
-            sender.sendMessage("Заметка для себя: " + message);
+            sender.sendMessageWithHistory("Заметка для себя: " + message);
         }
 
         for (ClientHandler receiver : clients) {
             if (receiver.getUser().getNickname().equals(nick)) {
-                receiver.sendMessage("от " + sender.getUser().getNickname() + ": " + message);
-                sender.sendMessage("для " + nick + ": " + message);
+                receiver.sendMessageWithHistory("от " + sender.getUser().getNickname() + ": " + message);
+                sender.sendMessageWithHistory("для " + nick + ": " + message);
                 return;
             }
         }
-        sender.sendMessage("Клиент " + nick + " не найден");
+        sender.sendMessageWithHistory("Клиент " + nick + " не найден");
     }
 
     public void broadcastClientList() {

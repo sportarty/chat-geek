@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by Artem Kropotov on 17.05.2021
@@ -14,10 +16,13 @@ public class ClientHandler {
     private DataOutputStream out;
     private DataInputStream in;
     private ServerChat serverChat;
-    private AuthService<User> authService = ListAuthService.getInstance();
+    private AuthService<User> authService = DBAuthService.getInstance();
+    private HistoryService historyService = new FileHistoryService();
+    //private HistoryService historyService = DBHistoryService.getInstance();
+    //    private ru.gb.chat.server.AuthService<User> authService = ListAuthService.getInstance();
     private User user;
 
-    public ClientHandler(Socket socket, ServerChat serverChat) {
+    public ClientHandler(Socket socket, ServerChat serverChat) throws SQLException {
         try {
             this.socket = socket;
             this.out = new DataOutputStream(socket.getOutputStream());
@@ -34,6 +39,10 @@ public class ClientHandler {
                             User user = authService.findByLoginAndPassword(token[1], token[2]);
                             if (user != null && !serverChat.isNickBusy(user.getNickname())) {
                                 sendMessage("/authok " + user.getNickname());
+                                List<String> messages = historyService.findHundredByUser(user);
+                                for (String mess: messages) {
+                                    sendMessage(mess);
+                                }
                                 this.user = user;
                                 serverChat.subscribe(this);
                                 break;
@@ -89,6 +98,16 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
+
+    public void sendMessageWithHistory(String message) {
+        try {
+            out.writeUTF(message);
+            historyService.save(user,message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void sendMessage(String message) {
         try {
