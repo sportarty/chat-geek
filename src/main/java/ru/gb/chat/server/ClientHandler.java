@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by Artem Kropotov on 17.05.2021
@@ -14,7 +16,11 @@ public class ClientHandler {
     private DataOutputStream out;
     private DataInputStream in;
     private ServerChat serverChat;
-    private AuthService<User> authService = ListAuthService.getInstance();
+    private AuthService<User> authService = DBAuthService.getInstance();
+    private HistoryService historyService = DBHistoryService.getInstance();
+    private HistoryService fileHistoryService = new FileHistoryService();
+
+
     private User user;
 
     public ClientHandler(Socket socket, ServerChat serverChat) {
@@ -34,6 +40,11 @@ public class ClientHandler {
                             User user = authService.findByLoginAndPassword(token[1], token[2]);
                             if (user != null && !serverChat.isNickBusy(user.getNickname())) {
                                 sendMessage("/authok " + user.getNickname());
+                                List<String> messages = historyService.findForUser(user);
+                                List<String> fileMessages = fileHistoryService.findForUser(user);
+                                for (String mess: messages) {
+                                    sendMessage(mess);
+                                }
                                 this.user = user;
                                 serverChat.subscribe(this);
                                 break;
@@ -68,6 +79,12 @@ public class ClientHandler {
                                 serverChat.privateMsg(this, token[1], token[2]);
 
                             }
+                            if (msg.startsWith("/update")) {
+                                String[] token = msg.split("\\s");
+                                serverChat.unsubscribe(this);
+                                this.user= authService.updateNick(this.getUser(),token[1]);
+                                serverChat.subscribe(this);
+                            }
                             if (msg.equals("/del")) {
                                 authService.remove(user);
                                 sendMessage("/end");
@@ -86,6 +103,16 @@ public class ClientHandler {
             }).start();
         } catch (IOException e) {
             disconnect();
+            e.printStackTrace();
+        }
+    }
+
+    public void sendMessageWithHistory(String message) {
+        try {
+            out.writeUTF(message);
+            historyService.save(user,message);
+            fileHistoryService.save(user, message);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

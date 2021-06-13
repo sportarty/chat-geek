@@ -50,6 +50,11 @@ public class ListAuthService implements AuthService<User> {
     }
 
     @Override
+    public User updateNick(User user, String nick) {
+        return null;
+    }
+
+    @Override
     public User save(User user) {
         users.add(user);
         return user;
