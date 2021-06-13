@@ -9,55 +9,50 @@ import java.util.List;
 public class DBAuthService  implements AuthService<User>  {
 
     private static DBAuthService INSTANCE;
-    private static Connection connection;
-    private static Statement statement;
-    private static String URL = "jdbc:postgresql://localhost:5432/gb";
-    private static String USER = "gbChat";
-    private static String PASS = "12345";
+    private final PreparedStatement psFindByLoginOrNick;
+    private final PreparedStatement psFindByLoginAndPassword;
+    private final PreparedStatement psSaveUser;
+    private final PreparedStatement psDeleteUser;
+    private final PreparedStatement psUpdateNick;
 
-    private DBAuthService () {
-        try {
-            connect();
-        } catch (SQLException | ClassNotFoundException  throwables) {
-            throwables.printStackTrace();
-        }
+
+    private DBAuthService () throws SQLException {
+        psFindByLoginOrNick =
+                DBService.createPreparedStatement("SELECT login, password,  FROM users WHERE login=? OR nickname=?");
+        psFindByLoginAndPassword =
+                DBService.createPreparedStatement("SELECT login, password, nick FROM users WHERE login=? AND password=?");
+        psSaveUser =
+                DBService.createPreparedStatement("INSERT INTO users (login, password, nick)  VALUES (?,?,?)");
+        psDeleteUser =
+                DBService.createPreparedStatement("DELETE FROM users WHERE login=? AND password=? AND nickname=?");
+        psUpdateNick =
+                DBService.createPreparedStatement("UPDATE users SET nickname=? WHERE login=? AND password=? AND nickname=?");
     }
 
-    public static void connect() throws SQLException, ClassNotFoundException {
-        Class.forName("org.postgresql.Driver");
-        connection = DriverManager.getConnection(URL, USER, PASS);
-        statement = connection.createStatement();
-        System.out.println("Success connected to DB");
-    }
-
-    private static void disconnect() {
-        try {
-            if (connection != null) {
-                connection.close();
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
 
     public static DBAuthService getInstance() {
         if (INSTANCE == null) {
             synchronized (DBAuthService.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = new DBAuthService();
+                    try {
+                        INSTANCE = new DBAuthService();
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
                 }
             }
         }
         return INSTANCE;
     }
 
+
     @Override
     public User findByLoginAndPassword(String login, String password) {
         try {
-            PreparedStatement ps = connection.prepareStatement("SELECT login, password, nick FROM users WHERE login=? AND password=?");
-            ps.setString(1, login);
-            ps.setString(2, password);
-            ResultSet rs = ps.executeQuery();
+
+            psFindByLoginAndPassword.setString(1, login);
+            psFindByLoginAndPassword.setString(2, password);
+            ResultSet rs = psFindByLoginAndPassword.executeQuery();
             if (!rs.next()) return null;
             else {
                 System.out.println(rs.getString(1));
@@ -73,10 +68,9 @@ public class DBAuthService  implements AuthService<User>  {
     @Override
     public User findByLoginOrNick(String login, String nick) {
         try {
-            PreparedStatement ps = connection.prepareStatement("SELECT login, password,  FROM users WHERE login=? AND nickname=?");
-            ps.setString(1, login);
-            ps.setString(2, nick);
-            ResultSet result = ps.executeQuery();
+            psFindByLoginOrNick.setString(1, login);
+            psFindByLoginOrNick.setString(2, nick);
+            ResultSet result = psFindByLoginOrNick.executeQuery();
             if (!result.next()) {
                 return null;
             } else {
@@ -92,12 +86,12 @@ public class DBAuthService  implements AuthService<User>  {
     @Override
     public User updateNick(User user, String nick) {
         try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE users SET nickname=? WHERE login=? AND password=? AND nickname=?");
-            ps.setString(1, nick);
-            ps.setString(2, user.getLogin());
-            ps.setString(3, user.getPassword());
-            ps.setString(4, user.getNickname());
-            ps.executeUpdate();
+
+            psUpdateNick.setString(1, nick);
+            psUpdateNick.setString(2, user.getLogin());
+            psUpdateNick.setString(3, user.getPassword());
+            psUpdateNick.setString(4, user.getNickname());
+            psUpdateNick.executeUpdate();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             return null;
@@ -108,11 +102,10 @@ public class DBAuthService  implements AuthService<User>  {
     @Override
     public User save(User object) {
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO users (login, password, nick)  VALUES (?,?,?)");
-            ps.setString(1, object.getLogin());
-            ps.setString(2, object.getPassword());
-            ps.setString(3, object.getNickname());
-            ps.executeUpdate();
+            psSaveUser.setString(1, object.getLogin());
+            psSaveUser.setString(2, object.getPassword());
+            psSaveUser.setString(3, object.getNickname());
+            psSaveUser.executeUpdate();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -122,9 +115,10 @@ public class DBAuthService  implements AuthService<User>  {
     @Override
     public User remove(User object) {
         try {
-            PreparedStatement ps = connection.prepareStatement("DELETE FROM users WHERE login=?");
-            ps.setString(1, object.getLogin());
-            ps.executeQuery();
+            psDeleteUser.setString(1, object.getLogin());
+            psDeleteUser.setString(2, object.getPassword());
+            psDeleteUser.setString(3, object.getNickname());
+            psDeleteUser.executeQuery();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
