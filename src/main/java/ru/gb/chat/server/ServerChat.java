@@ -1,8 +1,11 @@
 package ru.gb.chat.server;
 
+import javafx.util.Pair;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -10,6 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class ServerChat {
     private final CopyOnWriteArrayList<ClientHandler> clients = new CopyOnWriteArrayList<>();
+    public final Logger<Pair<String,String>> log = new DBLogger();
 
     public static void main(String[] args) {
         new ServerChat().start();
