@@ -52,11 +52,8 @@ public class ClientHandler {
                                 sendMessage("/authok " + user.getNickname());
                                 this.user = user;
                                 serverChat.subscribe(this);
-                                serverChat.log.getNumLast(100).forEach(new Consumer<Pair<String, String>>() {
-                                    @Override
-                                    public void accept(Pair<String, String> stringStringPair) {
-                                        sendMessage(stringStringPair.getKey() + ": " + stringStringPair.getValue());
-                                    }
+                                serverChat.log.getNumLast(100).forEach((T) -> {
+                                    sendMessage(T.getKey() + ": " + T.getValue());
                                 });
                                 break;
                             } else {
