@@ -1,9 +1,12 @@
 package ru.gb.chat.server;
 
+import javafx.util.Pair;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.function.Consumer;
 
 /**
  * Created by Artem Kropotov on 17.05.2021
@@ -49,6 +52,9 @@ public class ClientHandler {
                                 sendMessage("/authok " + user.getNickname());
                                 this.user = user;
                                 serverChat.subscribe(this);
+                                serverChat.log.getNumLast(100).forEach((T) -> {
+                                    sendMessage(T.getKey() + ": " + T.getValue());
+                                });
                                 break;
                             } else {
                                 sendMessage("/regfail");
@@ -75,6 +81,7 @@ public class ClientHandler {
                             }
                         } else {
                             serverChat.broadcastMsg(user.getNickname() + ": " + msg);
+                            serverChat.log.add(new Pair<>(user.getNickname(), msg));
                         }
                     }
                 } catch (IOException e) {
