@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="windows-1252" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2021-06-24T16:09:41</date>
+  <millis>1624540181831</millis>
+  <sequence>0</sequence>
+  <logger></logger>
+  <level>INFO</level>
+  <class>java.util.logging.LogManager$RootLogger</class>
+  <method>log</method>
+  <thread>1</thread>
+  <message>Сервер запущен</message>
+</record>
+<record>
+  <date>2021-06-24T16:10:13</date>
+  <millis>1624540213505</millis>
+  <sequence>1</sequence>
+  <logger></logger>
+  <level>INFO</level>
+  <class>java.util.logging.LogManager$RootLogger</class>
+  <method>log</method>
+  <thread>1</thread>
+  <message>Клиент подключил�?�?</message>
+</record>
+<record>
+  <date>2021-06-24T16:11:03</date>
+  <millis>1624540263507</millis>
+  <sequence>2</sequence>
+  <logger></logger>
+  <level>INFO</level>
+  <class>java.util.logging.LogManager$RootLogger</class>
+  <method>log</method>
+  <thread>12</thread>
+  <message>Клиент login1 отключил�?�?</message>
+</record>
