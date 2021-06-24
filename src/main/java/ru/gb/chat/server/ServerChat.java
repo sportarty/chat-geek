@@ -4,23 +4,30 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by Artem Kropotov on 17.05.2021
  */
 public class ServerChat {
+    private static final Logger LOGGER = Logger.getLogger("");
+
     private final CopyOnWriteArrayList<ClientHandler> clients = new CopyOnWriteArrayList<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         new ServerChat().start();
     }
 
-    public void start() {
+    public void start() throws IOException {
+        FileHandler fileHandler = new FileHandler("MyLOG.log");
+        LOGGER.addHandler(fileHandler);
         try(ServerSocket serverSocket = new ServerSocket(8189)) {
-            System.out.println("Сервер запущен");
+            LOGGER.log(Level.INFO,"Сервер запущен");
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Клиент подключился");
+                LOGGER.log(Level.INFO,"Клиент подключился");
                 new ClientHandler(socket, this);
             }
         } catch (IOException e) {
@@ -59,16 +66,19 @@ public class ServerChat {
     public void privateMsg(ClientHandler sender, String nick, String message) {
         if (sender.getUser().getNickname().equals(nick)) {
             sender.sendMessage("Заметка для себя: " + message);
+            LOGGER.log(Level.INFO,"Клиент написал заметку для себя "+ message);
         }
 
         for (ClientHandler receiver : clients) {
             if (receiver.getUser().getNickname().equals(nick)) {
                 receiver.sendMessage("от " + sender.getUser().getNickname() + ": " + message);
                 sender.sendMessage("для " + nick + ": " + message);
+                LOGGER.log(Level.INFO,"Клиент " + sender.getUser().getNickname() + " написал " + nick + " следующее сообщение: " + message);
                 return;
             }
         }
         sender.sendMessage("Клиент " + nick + " не найден");
+        LOGGER.log(Level.WARNING,"Клиент " + nick + " не найден");
     }
 
     public void broadcastClientList() {
