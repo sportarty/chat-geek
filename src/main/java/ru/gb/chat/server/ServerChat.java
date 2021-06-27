@@ -17,7 +17,7 @@ public class ServerChat {
     private  String USER = "postgres";
     private  String PASS = "admin";
 
-    private Connection connection; // Интерфейс подключения
+    private Connection connection;
     private Statement statement; // Для запросов в БД
 
     public Connection getConnection() {

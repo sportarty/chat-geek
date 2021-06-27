@@ -80,14 +80,14 @@ public class ClientHandler {
                             serverChat.broadcastMsg(user.getNickname() + ": " + msg);
                         }
                     }
-                } catch (IOException e) {
+                } catch (IOException | SQLException e) {
                     e.printStackTrace();
                 } finally {
                     System.out.println("Клиент отключился");
                     disconnect();
                 }
             }).start();
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             disconnect();
             e.printStackTrace();
         }
