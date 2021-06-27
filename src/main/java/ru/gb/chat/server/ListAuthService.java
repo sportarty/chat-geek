@@ -1,6 +1,8 @@
 package ru.gb.chat.server;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -30,23 +32,23 @@ public class ListAuthService implements AuthService<User> {
     }
 
     @Override
-    public User findByLoginAndPassword(String login, String password) {
+    public Optional<User> findByLoginAndPassword(String login, String password) {
         for (User u : users) {
             if (u.getLogin().equals(login) && u.getPassword().equals(password)) {
-                return u;
+                return Optional.of(u);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public User findByLoginOrNick(String login, String nick) {
+    public Optional<User> findByLoginOrNick(String login, String nick) {
         for (User u : users) {
             if (u.getLogin().equals(login) || u.getNickname().equals(nick)) {
-                return u;
+                return Optional.of(u);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override

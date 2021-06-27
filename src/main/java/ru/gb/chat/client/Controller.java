@@ -118,12 +118,10 @@ public class Controller implements Initializable {
 
     public void setCallbacks() {
         NetworkService.setCallOnException(args ->
-                Platform.runLater(() -> {
-                new Alert(
+                Platform.runLater(() -> new Alert(
                         Alert.AlertType.WARNING,
                         String.valueOf(args[0]),
-                        ButtonType.OK).showAndWait();
-                }));
+                        ButtonType.OK).showAndWait()));
 
         NetworkService.setCallOnAuthenticated(args -> {
             nickname = String.valueOf(args[0]);
@@ -147,6 +145,9 @@ public class Controller implements Initializable {
             }
         });
 
-        NetworkService.setCallOnDisconnect(args -> setAuthenticated(false));
+        NetworkService.setCallOnDisconnect(args ->  {
+            setAuthenticated(false);
+            textArea.clear();
+        });
     }
 }

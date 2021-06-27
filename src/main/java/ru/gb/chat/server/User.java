@@ -6,9 +6,12 @@ import java.util.Objects;
  * Created by Artem Kropotov on 24.05.2021
  */
 public class User {
-    private final String login;
-    private final String password;
-    private final String nickname;
+    private  String login;
+    private  String password;
+    private  String nickname;
+
+    public User() {
+    }
 
     public String getLogin() {
         return login;

@@ -6,14 +6,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.sql.Connection;
 
 /**
  * Created by Artem Kropotov on 17.05.2021
  */
 public class NetworkService {
     private static final String IP_ADDRESS = "localhost";
-    private static final int PORT = 8189;
+    private static final int PORT = 8190;
 
     private static Socket socket;
     private static DataInputStream in;

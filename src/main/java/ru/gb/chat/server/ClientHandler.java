@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by Artem Kropotov on 17.05.2021
@@ -14,7 +16,8 @@ public class ClientHandler {
     private DataOutputStream out;
     private DataInputStream in;
     private ServerChat serverChat;
-    private AuthService<User> authService = ListAuthService.getInstance();
+    private final AuthService<User> authService = DBAuthService.getInstance();
+    private final HistoryService historyService = DBHistoryService.getInstance();
     private User user;
 
     public ClientHandler(Socket socket, ServerChat serverChat) {
@@ -31,35 +34,36 @@ public class ClientHandler {
                         // /auth login password
                         if (msg.startsWith("/auth ")) {
                             String[] token = msg.split("\\s");
-                            User user = authService.findByLoginAndPassword(token[1], token[2]);
-                            if (user != null && !serverChat.isNickBusy(user.getNickname())) {
-                                sendMessage("/authok " + user.getNickname());
-                                this.user = user;
-                                serverChat.subscribe(this);
-                                break;
+                            Optional<User> userOptional = authService.findByLoginAndPassword(token[1], token[2]);
+                            if (userOptional.isPresent()) {
+                                User user = userOptional.get();
+                                if (!serverChat.isNickBusy(user.getNickname())) {
+                                    this.user = user;
+                                    successAuthorization();
+                                    break;
+                                }
                             } else {
-                                sendMessage("/authfail");
+                                sendServiceMessage("/authfail");
                             }
                             // /register login nickname password
                         } else if (msg.startsWith("/register ")) {
                             String[] token = msg.split("\\s");
-                            User user = authService.findByLoginOrNick(token[1], token[2]);
-                            if (user == null) {
-                                user = authService.save(new User(token[1], token[3], token[2]));
-                                sendMessage("/authok " + user.getNickname());
-                                this.user = user;
-                                serverChat.subscribe(this);
+                            Optional<User> userOptional = authService.findByLoginOrNick(token[1], token[2]);
+                            if (!userOptional.isPresent()) {
+                                this.user = authService.save(new User(token[1], token[3], token[2]));
+                                successAuthorization();
                                 break;
                             } else {
-                                sendMessage("/regfail");
+                                sendServiceMessage("/regfail");
                             }
                         }
                     }
+
                     while (true) {
                         String msg = in.readUTF();
                         if (msg.startsWith("/")) {
                             if (msg.equals("/end")) {
-                                sendMessage("/end");
+                                sendServiceMessage("/end");
                                 break;
                             }
                             // /w nick fg sdg sdfg sd
@@ -70,7 +74,7 @@ public class ClientHandler {
                             }
                             if (msg.equals("/del")) {
                                 authService.remove(user);
-                                sendMessage("/end");
+                                sendServiceMessage("/end");
                                 break;
                             }
                         } else {
@@ -90,7 +94,25 @@ public class ClientHandler {
         }
     }
 
-    public void sendMessage(String message) {
+    private void successAuthorization() {
+        sendServiceMessage("/authok " + user.getNickname());
+        List<String> messages = historyService.findAllByUser(user);
+        for(String msg : messages) {
+            sendServiceMessage(msg);
+        }
+        serverChat.subscribe(this);
+    }
+
+    public void sendMessageWithHistory(String message) {
+        try {
+            historyService.save(user, message);
+            out.writeUTF(message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendServiceMessage(String message) {
         try {
             out.writeUTF(message);
         } catch (IOException e) {
