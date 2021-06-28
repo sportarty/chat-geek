@@ -9,6 +9,17 @@ repositories {
     mavenCentral()
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation group: 'org.postgresql', name:'postgresql', version: '42.2.20'
+    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.2'
+}
+
+test {
+    useJUnitPlatform()
 }
