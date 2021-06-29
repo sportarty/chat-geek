@@ -54,7 +54,7 @@ public class DBAuthService  implements AuthService<User>  {
                 return Optional.of(new User(
                         resultSet.getString("login"),
                         resultSet.getString("password"),
-                        resultSet.getString("nickname")));
+                        resultSet.getString("nick")));
             }
         } catch (SQLException e) {
             e.printStackTrace();

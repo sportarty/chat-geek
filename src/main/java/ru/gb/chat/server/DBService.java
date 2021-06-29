@@ -10,8 +10,8 @@ import java.sql.SQLException;
  */
 public class DBService {
     private static final String DB_URL = "jdbc:postgresql://127.0.0.1:5432/gb";
-    private static final String USER = "geek";
-    private static final String PASS = "geek";
+    private static final String USER = "gbChat";
+    private static final String PASS = "12345";
 
     private static Connection connection;
 
