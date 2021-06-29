@@ -30,7 +30,7 @@
         </VBox>
     </HBox>
     <VBox fx:id="registerPanel" spacing="5.0">
-        <Text text="Зарегетрироваться">
+        <Text text="Зарегистрироваться">
             <font>
                 <Font size="16.0" />
             </font>
