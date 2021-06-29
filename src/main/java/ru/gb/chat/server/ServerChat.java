@@ -1,14 +1,18 @@
 package ru.gb.chat.server;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 /**
  * Created by Artem Kropotov on 17.05.2021
  */
 public class ServerChat {
+    private static final Logger LOGGER = LogManager.getLogger(ServerChat.class);
+
     private final CopyOnWriteArrayList<ClientHandler> clients = new CopyOnWriteArrayList<>();
 
     public static void main(String[] args) {
@@ -17,19 +21,21 @@ public class ServerChat {
 
     public void start() {
         try(ServerSocket serverSocket = new ServerSocket(8189)) {
-            System.out.println("Сервер запущен");
+            LOGGER.info("Сервер запущен");
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Клиент подключился");
+                LOGGER.info("Клиент подключился");
                 new ClientHandler(socket, this);
             }
         } catch (IOException e) {
+            LOGGER.error("Exception: ", e);
             e.printStackTrace();
         }
         System.out.println();
     }
 
     public void broadcastMsg(String msg) {
+        LOGGER.info("Отправлено сообщение " + msg);
         for (ClientHandler client : clients) {
             client.sendMessage(msg);
         }
